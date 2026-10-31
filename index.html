@@ -102,5 +102,173 @@ document.addEventListener('change',async function(e){if(e.target.id!=='progressi
 const originalSetSubject=setSubject;setSubject=function(sub){if(S.view==='notes'){S.subject=sub;render();scrolltop();return;}originalSetSubject(sub)};
 // Cosmetic counts shown in legacy side menu already use original-bank totals; update in the newly added panel.
 
+// ===== 115 年 11/14：章節題目修復、逐題解析與官方法規核對 =====
+(function(){
+  const second='第二章 人身保險的意義與功能';
+  ['G114P013','G114P016'].forEach(id=>{
+    const q=qMap[id];
+    if(q&&q.subject==='保險實務'){
+      q.sourceChapter=q.chapter;
+      q.chapter=second; // 課程主題重新分類；PDF 頁碼、原題號、答案不更動。
+    }
+  });
+  const unit=CH.find(l=>l.subject==='保險實務'&&l.chapter===second);
+  if(unit){
+    const topic=unit.topics.find(t=>/家庭與國家/.test(t.title));
+    if(topic) topic.refs=[...new Set([...topic.refs,'G114P013','G114P016'])];
+  }
+  // 不要讓「只練公會精選」篩選器把章節內原有題目全部遮住。
+  const beforeStart=startQuiz;
+  startQuiz=function(type,ch){
+    if(type==='chapter'){
+      const previous=S.pool;S.pool='all';
+      try{return beforeStart(type,ch)}finally{S.pool=previous}
+    }
+    return beforeStart(type,ch);
+  };
+  const beforeScope=scopeQ;
+  scopeQ=function(ch){
+    const filtered=beforeScope(ch);
+    if(filtered.length===0&&S.chapter!==null&&S.chapter!==undefined){
+      const lesson=CH.find(l=>l.id===Number(S.chapter));
+      if(lesson)return Q.filter(q=>q.subject===lesson.subject&&q.chapter===lesson.chapter);
+    }
+    return filtered;
+  };
+
+  const REF={
+    insurance:{name:'金管會《保險法》現行條文',url:'https://law.fsc.gov.tw/LawContent.aspx?id=FL006746'},
+    agent:{name:'金管會《保險業務員管理規則》',url:'https://law.fsc.gov.tw/LawContent.aspx?id=FL006761'},
+    tax:{name:'財政部：115 年遺產稅與贈與稅公告',url:'https://www.dot.gov.tw/singlehtml/ch26?cntId=266ef2de8dd54f9494bd5c399b3f323a'},
+    training:{name:'人身保險業務員教育訓練要點（115 年 4 月修正）',url:'https://law.lia-roc.org.tw/Law/Content?lsid=FL091718'},
+    consumer:{name:'金管會《金融消費者保護法》',url:'https://law.fsc.gov.tw/LawContent.aspx?id=GL000206'}
+  };
+  const facts=[
+    [/主觀風險|客觀風險/, '客觀風險是能由資料觀察、統計與衡量的風險；主觀風險則涉及個人對不確定性的認知、心理與判斷。',null],
+    [/純粹風險|投機風險/, '純粹風險只有發生損失或沒有損失，沒有獲利機會；投機風險則可能虧損、無損益或獲利。一般保險主要處理純粹風險。',null],
+    [/基本風險|特定風險/, '基本風險影響範圍較大，例如大規模天災或經濟變動；特定風險通常影響個人或特定財物。判斷時看「波及範圍」，而不是金額大小。',null],
+    [/損失頻率|損失幅度|損失成本|死亡率計算|撫卹金/, '損失頻率是某期間事故發生的次數或機率；損失幅度是每次事故造成的金額。預期損失成本＝預期頻率×預期損失幅度，例如 0.326% × 100 萬元＝3,260 元。',null],
+    [/風險自留|風險移轉|風險預防|風險抑制|風險管理的方法/, '風險避免是不從事相關活動；預防是降低事故發生機率；抑制是降低事故後損失程度；移轉可藉保險由保險人承擔約定損失；自留則是自己承擔未移轉部分。',null],
+    [/道德風險|心理風險/, '道德風險重點在於故意或不誠實，例如為獲保險金刻意製造事故；心理風險是因疏忽、冷漠或不夠注意而增加事故機會，並非故意詐欺。',null],
+    [/人身保險對個人|人身保險對國家|人身保險功能|保證信用/, '人身保險的核心是分散生命、健康與工作能力受損所帶來的家庭經濟壓力；延伸可支持儲蓄、退休、信用與社會安定，但不是任何事故都必然理賠。',null],
+    [/生命表|死亡機率|死亡率|生存機率|純保險費/, '生命表是根據人口或保戶經驗統計死亡與生存機率，是壽險精算保費的重要基礎。死亡率與生存率在同一期間互為補數；純保費概念可從預期給付金額估算。',null],
+    [/責任準備金|保單價值準備金|解約金/, '責任準備金是保險公司為履行未來保險給付責任所提存的負債；保單價值準備金是保單價值計算基礎，解約金則依契約及適用規定計算，不能一律視為相等。',null],
+    [/分紅保單|利差益|死差益|費差益|保單紅利/, '分紅通常與商品經營成果有關，可從投資收益、死亡經驗、費用等差異理解；紅利分配與給付方式須依保單條款，非分紅型保單不能假定會分紅。',null],
+    [/預定利率|宣告利率|利率變動型年金/, '預定利率是精算或年金給付換算時使用的假設；宣告利率是利率變動型商品依條款公告的利率。兩者用途不同，也不可把宣告利率誤認為固定保證報酬。',null],
+    [/年金保險|連生共存|最後生存者|即期年金|遞延年金/, '年金重點在於生存期間的分期給付。即期年金較早開始給付，遞延年金先累積再給付；「連生共存」通常須受領人皆生存，「最後生存者年金」則至少一人仍生存即可繼續。',null],
+    [/定期壽險|終身壽險|生存保險|養老保險|生死合險/, '定期壽險重點是約定期限內的死亡保障，終身壽險則提供終身死亡保障；生存保險看期滿是否生存，生死合險則結合死亡與滿期生存給付。',null],
+    [/健康保險|傷害保險|意外事故|外來性|突發性/, '健康保險常處理疾病與符合條款的醫療／失能風險；傷害保險的意外事故一般須具外來、突發且非疾病等條件。是否給付仍需看契約約定。',null],
+    [/長期照顧|失智|巴氏量表|生活自理能力/, '長期照顧保障的認定涉及日常生活活動能力及認知功能等條款門檻；不能只憑年齡、單一病名或一次檢查就推定一定符合給付條件。',null],
+    [/投資型|投資帳戶|投資標的/, '投資型保單結合保障與投資配置，投資帳戶價值會隨標的及費用變化，與保險公司的保證給付不能混為一談；收益與本金都不應被無條件保證。',null],
+    [/保險利益|可保利益/, '保險利益是要保人對被保險人或保險標的具有法律承認的利害關係，目的是避免將保險變成賭博；人身保險相關規範可對照《保險法》第 16 條。','insurance'],
+    [/要保人|被保險人|受益人/, '要保人負責申請訂約與繳費；被保險人是生命或身體受保險保障者；受益人是依契約有權請求保險金者。三個角色可以不同，權利義務也不相同。','insurance'],
+    [/未滿.?15|未滿十五|喪葬費用/, '依《保險法》第 107 條，未滿 15 歲被保險人之一般死亡給付要到滿 15 歲才生效；滿 15 歲前死亡涉及法定喪葬費用限額，不能等同一般身故理賠。','insurance'],
+    [/第三人訂立|被保險人書面同意|第一百零五條|第105條/, '依《保險法》第 105 條，由第三人訂立死亡保險契約，應取得被保險人書面同意並約定保險金額；被保險人撤銷同意時也須依法以書面通知。','insurance'],
+    [/受益人.*故意|謀害被保險人|要保人故意致/, '依《保險法》第 121 條，受益人故意致被保險人死亡或雖未致死，將喪失受益權；要保人故意致死又涉及不同的保險金與保單價值準備金處理。','insurance'],
+    [/受益人.*疑義|變更受益人|指定受益人/, '受益人有疑義時可參照《保險法》第 45 條；受益人之指定、變更涉及要保人權利、被保險人同意及通知保險人，不能把「指定」與「保險事故後變更」混淆。','insurance'],
+    [/告知義務|最大誠信|解除契約|第64條/, '訂約時對書面詢問的重要危險事項有據實告知義務；違反告知義務是否得解除契約，須看《保險法》第 64 條的條件、期限及事故因果關係。','insurance'],
+    [/寬限期間|停效|復效|自動墊繳/, '寬限期內與停效後的保障效力不同；停效後申請復效通常有期限及繳費程序，自動墊繳則以保單可利用之價值代繳。不可把「停效」「終止」「無效」視為同義。','insurance'],
+    [/保單借款|質押借款|墊繳保費/, '有保單價值的契約可能符合保單借款條件；保單借款不是免費領回，會產生本金與利息，且可能影響保單效力和理賠金額。','insurance'],
+    [/近因原則|主力近因/, '主力近因指引起保險事故的主要、有效原因，不一定是時間上最後或距離最近的因素；判斷時要看因果鏈是否連續及承保範圍。','insurance'],
+    [/代位|分攤原則|損害填補/, '損害填補原則避免保險給付超過實際可填補的損失；代位追償主要見於損害保險，人壽保險依法有代位限制。分攤則須看契約類型與給付性質。','insurance'],
+    [/保險業務員.*登錄|登錄證|資格測驗|學歷|撤銷登錄/, '依《保險業務員管理規則》，業務員須符合資格並完成登錄、領得登錄證，才可依所屬公司授權招攬；資格測驗通過不等於已取得無限制招攬資格。','agent'],
+    [/招攬|業務員報告書|親晤|代客戶簽名|代為填寫/, '招攬保險應確認本人意願、如實說明商品並取得要保人及被保險人依法親簽的文件；不能讓業務員自行代替客戶完成須親簽的程序。','agent'],
+    [/教育訓練|外部共同|法令遵循/, '業務員教育訓練的時數、課程與義務可能修正。115 年 4 月版《人身保險業務員教育訓練要點》已更新，題庫的舊版訓練數字需另行查核。','training'],
+    [/金融消費者.*定義|金融消費者係指|金消法.*金融消費者/, '《金融消費者保護法》第 4 條將一般金融商品／服務接受者納入保護，但排除專業投資機構及符合法定財力或專業能力條件的自然人或法人；不能把所有人都一律視為金融消費者。','consumer'],
+    [/金融消費評議|申訴|金融消費爭議|金融服務業.*處理/, '《金融消費者保護法》第 13 條：先向金融服務業申訴，業者應在收到申訴後 30 日內處理；不接受結果或逾期未處理，可在收到結果／期限屆滿後 60 日內向爭議處理機構申請評議。','consumer'],
+    [/金消法|金融消費者|公平待客/, '金融消費保護重點包含公平待客、資訊揭露、適合度與爭議處理。金融消費者依法有一定保護範圍，不包括專業投資機構及符合規定之高財力／專業能力者。','consumer'],
+    [/洗錢防制|大額通貨交易|非金融事業/, '洗錢防制涉及客戶身分確認、紀錄保存、可疑交易及大額通貨交易通報等不同義務；先區分「適用對象」「通報門檻」及「辦理期限」，再對照題目問法。',null],
+    [/定型化契約|誠信原則|顯失公平/, '定型化契約由業者預先擬定，仍受消費者保護及誠信原則限制；若內容顯失公平，或牴觸優先的個別磋商條款，不能主張一切條款均有效。',null],
+    [/壽險行銷|家庭經濟準備|準保戶|生活規劃書|保障缺口/, '需求分析應先辨識家庭收入、支出、撫養責任、保障缺口與保費負擔能力，再選擇合適的商品；不應僅以佣金、投資報酬或成交便利決定保障。',null],
+    [/遺產稅|贈與稅|遺產及贈與稅法|免稅額|扣除額|喪葬費扣除額/, '115 年官方公告：遺產稅免稅額 1,333 萬元、贈與稅每年免稅額 244 萬元；遺產扣除額包含配偶 553 萬、子女 56 萬、父母 138 萬、受扶養兄弟姊妹或祖父母 56 萬、喪葬費 138 萬元。請分清免稅額、扣除額與不計入遺產總額。','tax'],
+    [/個人資料|洗錢防制|定型化契約|消費者保護法/, '蒐集及運用個資應有合法目的與法定基礎；定型化契約遇到不公平或與個別約款衝突時，不能單靠業者片面聲明排除消費者權益。',null],
+  ];
+  function norm(s){return String(s||'').replace(/[\s，,。！？!?、:：；;（）()\[\]]/g,'').toLowerCase().slice(0,420)}
+  function similarity(a,b){
+    const aa=norm(a),bb=norm(b);if(!aa||!bb)return 0;
+    const grams=new Set();for(let i=0;i<aa.length-1;i++)grams.add(aa.slice(i,i+2));
+    let found=0;const g2=new Set();for(let i=0;i<bb.length-1;i++)g2.add(bb.slice(i,i+2));
+    for(const g of g2)if(grams.has(g))found++;
+    return 2*found/(grams.size+g2.size||1);
+  }
+  function primaryText(q){return q.stem+' '+q.options.join(' ')}
+  function bestTopic(q){
+    let candidates=[];
+    for(const l of CH)if(l.subject===q.subject)for(const t of l.topics){
+      const topicText=t.title+' '+t.definition+' '+t.trap;
+      let score=similarity(primaryText(q),topicText);
+      if(l.chapter===q.chapter)score+=0.045;
+      candidates.push({score,definition:t.definition,example:t.example,trap:t.trap,title:t.title});
+    }
+    for(const n of CRAM)if(n.subject===q.subject){
+      let score=similarity(primaryText(q),n.title+' '+n.definition+' '+(n.keywords||[]).join(' '));
+      candidates.push({score,definition:n.definition,example:n.example,trap:n.trap,title:n.title});
+    }
+    candidates.sort((a,b)=>b.score-a.score);
+    return candidates[0]||null;
+  }
+  function similarOriginal(q){
+    if(!q.priority)return null;
+    let best=null,score=0;
+    for(const other of Q){
+      if(other.priority||other.subject!==q.subject||!other.explanation||other.explanation.length<32)continue;
+      const sc=similarity(primaryText(q),primaryText(other));
+      if(sc>score){best=other;score=sc}
+    }
+    return score>=0.67?{q:best,score}:null;
+  }
+  const poorOriginal=q=>!q.explanation||q.explanation.includes('原 PDF 此題未附逐題解析')||norm(q.explanation).length<=8;
+  const isFalse=q=>/何者(?:為非|錯誤|不正確|有誤|不屬於|不是)|下列.*(?:錯誤|不正確)/.test(q.stem);
+  const caution=q=>q.subject==='保險法規'&&(/稅|免稅|扣除額|金額|[0-9０-９]+[％%年月日時]|期限|第\s*\d+\s*條|教育訓練|管理規則/.test(primaryText(q)));
+  function study(q){
+    const chosen=q.options[q.answer-1]||'（請依題庫正解）';
+    const context=primaryText(q), falseQ=isFalse(q), topic=bestTopic(q);
+    const factsFound=facts.filter(x=>x[0].test(context)).slice(0,3);
+    const close=poorOriginal(q)?similarOriginal(q):null;
+    const parts=[];
+    if(falseQ)parts.push(`這題要找的是「不正確／不適用」的說法；題庫選第 ${q.answer} 項「${chosen}」。要記得這是陷阱選項，不可把它當作正確法規背下來。`);
+    else parts.push(`題庫答案為第 ${q.answer} 項「${chosen}」。理解時先判斷題目考的是哪個分類、給付條件或權利義務，別只記選項編號。`);
+    if(factsFound.length){parts.push('核心判斷：'+factsFound.map(x=>x[1]).join(' '));}
+    else if(topic){parts.push(`對應觀念「${topic.title}」：${topic.definition}`);}
+    if(topic && (factsFound.length===0||topic.score>=0.18))parts.push(`例如：${topic.example} 易混淆之處：${topic.trap}`);
+    if(close){let desc=close.q.explanation.replace(/\s+/g,' ').slice(0,380);parts.push(`相近原精選題 #${close.q.number}（PDF 第 ${close.q.page} 頁）解析供對照：${desc}（兩題文字與選項仍應分別判斷。）`);}
+    if(q.subject==='保險法規'&&/遺產稅|贈與稅|扣除額|免稅額/.test(context)){
+      parts.push('【115 年更新提醒】若本題沿用「成年子女／受扶養兄弟姊妹扣除額 40 萬元」等舊數字，請注意 115 年法定公告為每人 56 萬元。原題庫答案保留作版本辨識，不代表可直接當成 115 年現行法規。');
+    }
+    return {text:parts.join('\n\n'),factRefs:[...new Set(factsFound.map(x=>x[2]).filter(Boolean))],needCheck:caution(q)||/稅|免稅|扣除額|115年/.test(context),poor:poorOriginal(q)};
+  }
+  const beforeQuestion=quizQuestion;
+  quizQuestion=function(){
+    let h=beforeQuestion();const q=qMap[S.quizIds[S.qIndex]];
+    if(!q||S.selected===null)return h;
+    const a=study(q);
+    if(a.needCheck)h=h.replace('正確答案是（','原題庫答案是（');
+    if(a.poor){
+      h=h.replace('原 PDF 此題未附逐題解析。下方「觀念提示」可協助理解；答案依原版題庫保留。','原 PDF 未附逐題解析；以下是另外整理的學習說明，不冒充原題庫內容。');
+    }
+    const links=a.factRefs.map(k=>REF[k]).filter(Boolean);
+    if(q.subject==='保險法規'&&!links.length&&a.needCheck)links.push(REF.insurance);
+    if(q.subject==='保險法規'&&/贈與|遺產|扣除額|免稅額/.test(primaryText(q))&&!links.some(l=>l.url===REF.tax.url))links.push(REF.tax);
+    const title=a.poor?'補充解析｜依觀念與相近題整理':'逐題理解｜補充判斷方法';
+    const box=`<div class="note" style="margin:15px 0;background:#f0f8f6;border-color:#a9d5ce"><strong style="color:#155c57">📘 ${title}</strong><p style="white-space:pre-line;line-height:1.85;margin:12px 0 0">${esc(a.text)}</p>${a.needCheck?'<p style="color:#93601a;margin:12px 0 0;font-weight:650">⚠ 涉及可能更新的法規、金額或期限：原題庫答案與 115 年現行條文須分開辨識，未宣稱逐條完成核實。</p>':''}${links.length?`<p style="margin:12px 0 0;font-size:12px">官方查證入口：${links.map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.name)}</a>`).join('　·　')}</p>`:''}</div>`;
+    return h.replace('<div class="qfoot">',box+'<div class="qfoot">');
+  };
+  const beforeQuizSetup=quizSetup;
+  quizSetup=function(){let h=beforeQuizSetup();const ch=CH.find(l=>l.id===Number(S.chapter));
+    if(ch){const n=Q.filter(q=>q.subject===ch.subject&&q.chapter===ch.chapter).length;
+      h=h.replace('<div class="quizintro">',`<div class="note" style="margin-bottom:15px">本章實際有 <b>${n} 題</b>（含原精選與公會精選）。當所選題庫沒有本章題目時，章節練習會自動顯示本章全部來源，不會再出現零題。</div><div class="quizintro">`);
+    }
+    return h;
+  };
+  // 題目來源切換立即更新可選題數。
+  document.addEventListener('change',function(e){if(e.target?.id==='sourcefilter'){S.pool=e.target.value;render()}},false);
+  // 加上版本與查證範圍說明，不更動舊 localStorage key，也不清除已答題目。
+  const beforeHome=home;
+  home=function(){let h=beforeHome();const n=Q.filter(poorOriginal).length;
+    const msg=`<div class="note" style="margin:18px 0"><strong>115 年 11/14 考前修訂說明</strong>：已修復第二章章節練習（本章目前 ${Q.filter(q=>q.subject==='保險實務'&&q.chapter===second).length} 題）。全部 ${Q.length} 題答題後均附獨立的觀念判斷與例子；其中 ${n} 題原檔解析不足，已用相近題與教材補充，但「補充」不等同於每題已完成官方法規核實。涉及年份、金額、資格及期限，優先參閱官方規定。</div>`;
+    return h+msg;
+  };
+})();
+
 render();
 </script></body></html>
