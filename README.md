@@ -1,5 +1,35 @@
-# 保險證照考前互動學習網站
+# 人身保險業務員｜11/14 考前互動學習網站
 
-GitHub Pages：Settings → Pages → Deploy from a branch → main → /(root) → Save。
+網站：**https://wiselifeai.github.io/insurance-study/**
 
-本網站的答題進度存在瀏覽器 localStorage；不同裝置不會自動同步，請使用網站內的匯出／匯入備份功能。
+直接進入閱讀模式：**https://wiselifeai.github.io/insurance-study/?book=all**
+
+直接閱讀保險實務第二章：**https://wiselifeai.github.io/insurance-study/?book=1**
+
+## 學習內容
+
+- **原始題庫 1,094 題**：兩本精選題庫（保險實務 267 題、法規 389 題）及 114 年公會精選 438 題，保留來源、頁碼與原標示答案。
+- **14 章〈文章與案例〉**：章節導讀、貫穿生活案例、72 個核心觀念、常見錯法與代表題解析；每章可直接回到題庫練習。
+- **72 個觀念單元、28 篇公會重點精講**：維持原本的教材與記憶卡功能。
+- **進度與錯題**：沿用原本 `insurance-study-v2` 的瀏覽器儲存鍵，更新網站不主動清空紀錄；不同裝置不會自動同步，請使用匯出／匯入備份功能。
+
+## 如何使用
+
+1. 進入網站，在左側導覽選擇 **文章與案例**；手機版可從首頁文章入口進入。
+2. 從「保險實務」或「保險法規」挑選一章，先讀導讀、生活例子、名詞解釋及易錯觀念。
+3. 展開該章的原題案例，對照題庫原始答案與解析；按「到測驗模式作答」或「開始本章測驗」。
+4. 答錯的題目會留在原網站的錯題複習紀錄；讀完可標記本章觀念已閱讀。
+
+## 來源與資訊版本
+
+- 三份使用者提供之人身保險業務員題庫（原題、原答案、部分原解析）。
+- [愛人家族｜人身保險業務員考試重點筆記](https://love-family.tw/topic/%E4%BA%BA%E8%BA%AB%E4%BF%9D%E9%9A%AA%E6%A5%AD%E5%8B%99%E5%93%A1%E8%80%83%E8%A9%A6%E9%87%8D%E9%BB%9E%E7%AD%86%E8%A8%98/)
+- [方格子｜人身保險筆記（一）](https://vocus.cc/article/680e7a51fd89780001ece798)
+- [方格子｜人身保險筆記（二）](https://vocus.cc/article/6838e64efd897800017cd381)
+- 官方查證：[金管會保險法](https://law.fsc.gov.tw/LawContent.aspx?id=FL006746) ｜ [業務員管理規則](https://law.fsc.gov.tw/LawContent.aspx?id=FL006761) ｜ [財政部115年遺產稅適用數字](https://www.mof.gov.tw/singlehtml/384fb3077bb349ea973e7fc6f13b6974?cntId=f2a148bdd1614850be9fa56df8cc9d5c)
+
+**注意**：文章及案例為依題庫重寫的學習材料，不是外部網站文章的全文轉載；題庫的原答案、歷史年度數字與115年現行法規須分別辨識。部分題目沒有原 PDF 逐題解析，既有的輔助觀念說明不代表全部完成法規逐條核證。
+
+## GitHub Pages
+
+Settings → Pages → Deploy from a branch → `main` → `/(root)`。
