@@ -58,6 +58,33 @@
 @media(max-width:850px){.art-grid{grid-template-columns:1fr}.art-article{padding:0 3px}.art-mast{padding-top:16px}.art-story{padding:18px}.article-banner{padding:21px}}
 @media print{.art-card,.article-banner button,.art-next button{display:none!important}.art-article{max-width:none}.art-exam{break-inside:avoid}}
 
+
+/* 每章全題解析：取自原題庫，不將沒有解析的題目冒充官方認定 */
+.ans-summary{margin:28px 0 40px;padding:26px 24px;background:#fcf8ed;border:1px solid #ecdfc1;border-radius:18px}
+.ans-summary h2{font-size:25px;margin:7px 0 11px}.ans-summary>p{font-size:15px;line-height:1.8;margin:0 0 20px}
+.ans-take{display:flex;gap:15px;padding:15px 0;border-top:1px solid #ebdfc9;align-items:flex-start}
+.ans-take p{margin:0 0 10px;font-size:15px;line-height:1.8}.ans-num{font-size:15px;min-width:33px;font-weight:900;color:#9b7543}
+.answer-knowledge{margin:24px 0;padding:24px 22px;background:#f7faf9;border:1px solid #d7e5e1;border-radius:16px}
+.answer-knowledge h3{font-size:20px;margin:0 0 10px}.answer-knowledge>p{font-size:14px;line-height:1.8;margin:0 0 15px}
+.ans-learn{margin:10px 0;padding:13px 16px;border-radius:11px;background:#fff;border:1px solid #e0eae6}
+.ans-learn span{font-size:12px;font-weight:800;color:#286f67}.ans-learn p{font-size:14px;margin:6px 0 9px;line-height:1.8;white-space:pre-line}
+.ans-all{border:1px solid #c6dbd5;border-radius:12px;margin-top:15px;background:white;overflow:hidden}
+.ans-all>summary{list-style:none;cursor:pointer;padding:15px 17px;background:#e9f5f0;font-size:15px;font-weight:800;color:#1b655e}
+.ans-all>summary:before{content:"＋";display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;background:#fff;border-radius:50%;margin-right:8px}
+.ans-all[open]>summary:before{content:"－"}
+.ans-list{padding:4px 14px 15px}
+.answer-detail{margin:9px 0;border:1px solid #e4e9e5;border-radius:10px;overflow:hidden;background:#fff}
+.answer-detail>summary{padding:12px 14px;list-style:none;font-size:14px;line-height:1.7;cursor:pointer;color:#2d4547;display:block}
+.answer-detail>summary:hover{background:#f5faf8}
+.answer-detail>summary:before{content:"＋";color:#236960;font-weight:900;margin-right:8px}.answer-detail[open]>summary:before{content:"－"}
+.ans-serial{font-size:11px;font-weight:900;color:#227366;background:#edf6f3;border-radius:7px;padding:3px 7px;margin-right:7px}
+.ans-inside{border-top:1px solid #e8eeea;padding:12px 17px 17px;background:#fcfefd}
+.ans-inside p{font-size:14px!important;white-space:pre-line;line-height:1.8;margin:9px 0}
+.ans-inside .ans-weak,.ans-inside .ans-caution{padding:10px 13px;background:#fff7e6;color:#805d26;border-radius:9px}
+.ans-inside .ans-source{font-size:12px!important;color:#778987}
+.ans-extra{margin-top:30px}.fact-newline{display:block}
+@media(max-width:700px){.ans-summary,.answer-knowledge{padding:20px 15px}.ans-take{gap:8px}.ans-list{padding:4px 8px 12px}}
+
 </style>
 </head><body>
 <div class="app"><aside id="sidebar" class="sidebar"><div class="brand"><div class="mark">保</div><div><strong>保險學習所</strong><small>人身保險業務員｜應考專區</small></div></div><div id="sidenav"></div><div class="sidebar-footer">依據你提供的兩本精選題庫整理。<br>答題資料只儲存在此瀏覽器。<br>法規及稅額請考前查核現行規定。</div></aside>
@@ -390,9 +417,61 @@ const originalSetSubject=setSubject;setSubject=function(sub){if(S.view==='notes'
     const hasOwn=q.explanation && q.explanation.length>20 && !q.explanation.includes("原 PDF 此題未附逐題解析");
     return `<details class="art-exam"><summary>${esc(q.stem.replace(/\s+/g," ").slice(0,170))}</summary><p><strong>${falseOne?"題庫要求找出的錯誤敘述":"題庫正確選項"}：</strong>（${q.answer}）${esc(chosen)}</p>${hasOwn?`<p><strong>題庫原始解析：</strong>${esc(q.explanation.slice(0,700))}</p>`:`<p>此題原 PDF 未提供充分的逐題解析，請先回到本章相關的定義與案例理解；這裡不把題庫答案冒充現行法規解釋。</p>`}<p class="source">題號 ${esc(q.id)} · ${esc(q.source)} · 第 ${q.page} 頁${falseOne?" · 注意：被選中的敘述是錯誤說法，不可照背":""}</p><button class="btn soft small" data-action="one" data-id="${q.id}">到測驗模式作答 →</button></details>`;
   }
+
+  const SOURCE_INSIGHTS=[[["風險不是保證會損失，考題同時檢查「將來性、損失可能性、不確定性」；損失金額未必非常龐大才構成風險。","P004"],["損失頻率回答發生多少次，損失幅度回答平均損失金額；二者混淆是風險衡量題的典型錯誤。","P003"],["預期損失成本使用事故發生機率與平均損失額進行估算，不能把平均預期成本當作一定發生的損失。","P017"],["投保保險是風險移轉，不是消除事故本身；事故後減輕損失與事故前降低機率也不能混用。","P002"]],[["國民生命表與保險業經驗生命表來源不同，國民生命表的編製與人口統計有關。","P032"],["保險主要透過風險移轉與分攤形成財務保障，不能說購買保險就是避免風險。","P034"],["題庫將保險功能分成人、家庭、國家等層次；個人保障、信用、資金形成與社會安定不是同一個面向。","P036"]],[["家庭形態改變、雙薪家庭增加，代表保障需求也必須隨角色與收入責任改變。","P039"],["面對客戶差異，保險業以商品細分化來滿足不同年齡、職業與需求。","P040"],["專業業務訓練、保險知識宣導及效率改善，是題庫強調的服務品質要素。","P042"],["死亡率與生命表的版本涉及施行時點，題庫中的「最新」必須視為原題出版時的描述，不可直接照搬到現行規範。","P038"]],[["人身保險制度的三個基本原則是相互扶助、公平的危險分擔與收支相等；不能把損害填補直接當成這三項之一。","P060"],["責任準備金是為未來給付責任所提存的金額，不是把所有累積保費視為個人可隨時領出的存款。","P062"],["解約金與保單價值準備金的關係，會因契約簽發時間、繳費期間及商品條款不同而不同。","P058"],["預定利率、死亡率、營業費用等是保費定價的核心假設；遇到歷史日期題應辨識適用時期。","P061"]],[["人身保險依《保險法》大類分為人壽、健康、傷害、年金；保單實際保障與受益人安排仍以商品及條款判斷。","P106"],["國民年金有自己的法定保障給付種類，不代表失業給付也屬於國民年金的給付項目。","P103"],["微型保險的主要對象與資格證明具有特定規範；不能單憑地區或職業印象就認定符合資格。","P104"],["國民年金的納保資格涉及年齡、戶籍及是否參加其他相關社會保險等條件，不能只看是否有工作。","P107"]],[["預收第一次保險費相當額的送金單要包含要保人、被保險人、保險種類、繳費方式及金額等必要資訊。","P198"],["業務員可以說明要保書及條款、轉送文件，但這與保險公司最終核保權限不同。","P199"],["客戶投保需求、風險承擔能力、財務狀況及當事人關係，是招攬與風險評估時需要注意的資料。","P200"],["新契約的危險選擇包括業務員、體檢醫師與核保人員等不同分工，不能把所有調查角色都當成核保程序。","P202"]],[["保單活化與轉換不一定對保戶更有利，可能改變預定利率、保費成本或保障條件。","P228"],["題庫列出的壽險行銷流程可記成：接近 → 問題 → 解決 → 決心 → 滿意。","P230"],["保險存摺是方便查詢保險資料的服務工具；功能細節須依目前提供的服務內容核對。","P229"],["保單活化需要核對保戶與被保險人的意思表示，並比較原保單與轉換後的保障成本。","P227"]],[["中途解約後究竟退還未到期保費或給付解約金，要先辨識一年期保障與長期壽險的商品性質。","P261"],["死亡給付與保單價值準備金之最低比率可能隨被保險人年齡條件變化，題庫所列組數及比例有時效性。","P260"],["年金未支領餘額如何處理，須看年金契約對身故受益人及其他應得之人的約定。","P264"],["實支實付理賠的副本控管措施屬於特定時期的監理及自律規範，應按適用日期辨識。","P262"]],[["保險利益是契約的重要法律基礎：要保人對本人、家屬及依法認可的相關人身可能具有保險利益。","L002"],["未滿 15 歲之死亡給付，除了喪葬費用的法定範圍外，其他死亡給付生效時間有特別規定。","L001"],["申請投保時的重要職業及健康資料須真實，不可由業務員代替客戶做不實意思表示或代簽名。","L005"],["保險業資金運用或共保的百分比與適用條件，是題庫中的法條題，讀時要把條文版本與現行規定分開。","L003"]],[["保險費的繳納可以涉及躉繳或分期繳付；「繳費期間」與「保障期間」不一定相同。","L059"],["依《保險法》，利害關係人得代要保人繳交保險費，不能說只能由要保人本人繳交。","L055"],["電子保單與紙本保單是載體不同，並不代表電子保單完全不能申請紙本。","L056"],["受益人指定後的處分權、保費代繳及契約效力，必須分辨不同人的權利，不能混用。","L057"]],[["保費列舉扣除要注意申報戶、親屬身分及被保險人等條件，不是任何幫家人繳的保費都可扣。","L187"],["被保險人死亡後，受益人取得保險金請求權又在受領前死亡時，可能構成受益人的遺產，而非直接回到被保險人的遺產。","L188"],["遺產稅扣除額的舊題庫常混有舊數字；例如題庫提及子女 40 萬、父母 100 萬，但這些數字不應當成 115 年通用金額。","L190"],["繼承順序、特留分與遺產稅扣除額分屬民法和稅法不同概念，回答前先區分法律問題。","L189"]],[["金融消費者保護與酬金制度規範，用來降低誤導銷售及利益衝突，不能把業績報酬視為唯一判斷標準。","L266"],["低洗錢風險情境的判斷，會考慮商品種類及交易特徵；不是所有保險交易均屬低風險。","L268"],["金融消費評議與一般訴訟不同；評議成立且經法院核可後，對同一事件的後續救濟有法律效果。","L270"],["審閱期間、招攬說明及資訊揭露的具體天數或程序，要依適用的法令與條款判斷。","L269"]],[["保險經紀人是基於被保險人利益洽訂保險契約或提供服務，與保險代理人的法律定位不同。","L318"],["人身保險業務員換發登錄證牽涉五年期間與規定教育訓練，不等於通過一次資格測驗便永久有效。","L320"],["申請登錄文件不實、受特定停止招攬處分或其他消極資格條件，可能造成不得登錄。","L321"],["教育訓練與法令遵循課程有其主管規定，不能直接把舊筆記的時數或執行單位視為永遠不變。","L319"]],[["住院醫療示範條款所稱住院，需看醫師診斷必要性、辦理住院手續及實際接受診療等條件。","L368"],["失蹤或傷害事故理賠，可能需要特定死亡或失蹤證明，不能把失蹤直接視作一般死亡。","L367"],["保險業所提存的準備金種類不只責任準備金，也包括未滿期保費、賠款等準備金。","L370"],["保險金信託及團體保險涉及不同法律關係，應分開辨認受益人的權利和信託管理方式。","L369"]]];
+  const CONCEPT_TAGS=[["風險,不確定,未來,風險要件","頻率,幅度,成本,死亡率,風險衡量","純粹,投機","基本風險,特定風險,海嘯,地震","避免,預防,移轉","抑制,自留,承擔","道德風險,心理風險,疏忽"],["保險保障,人身保險,經濟功能","國家功能,個人功能,社會功能,家庭功能,信用","國民生命表,經驗生命表,生命表","投資型,投資,保障"],["家庭,人口,高齡,少子,需求","長期,壽險,保障","科技,大數據,保險科技","弱勢,微型,普及"],["純保險費,附加費用,保險費","死亡率,費用率,利率,預定","責任準備金,提存","保單價值,解約金,繳清","生命表,死亡率,大數法則","分紅,紅利,利差,死差,費差"],["定期,終身,養老,生存保險","年金,即期,遞延,最後生存者","傷害,健康,旅行平安,意外","實支,日額,醫療","團體,個人保險","微型,弱勢","利率變動型,投資型,外溢"],["要保書,告知,書面詢問","核保,危險選擇,體檢","送金單,第一次保險費,收據,代收","身分,異常,洗錢"],["需求,保單健檢","活化,轉換","適合度,保單轉換","經紀人,代理人,業務員"],["解約,退還,未到期","失能,請領,文件"],["保險人,要保人,被保險人,受益人","保險利益,債權,債務","受益人,指定,變更","告知,誠信,解除","主力近因,原因","代位,分攤,損害填補","未滿十五,15歲,喪葬費"],["成立,生效,無效","撤銷,解除,終止,解約","寬限,停效,復效,催告","借款,自動墊繳,墊繳","保險金,申領,理賠","除外,等待,免責","電子保單,示範條款"],["所得稅,保費扣除,列舉","身故保險金,受益人,遺產","繼承,順位,應繼分","拋棄繼承,限定責任","遺產稅,贈與稅,免稅,扣除額","遺囑,特留分"],["金融消費者,公平待客","適合度,說明,揭露","評議,申訴","個人資料,個資","洗錢,可疑,交易","酬金,佣金,利益衝突"],["資格,登錄,測驗","限制,消極,不得登錄","教育訓練,換證,時數","停止招攬,處分,撤銷","代理人,經紀人"],["失蹤,住院,失能,理賠","投資,準備金,監理,保證金","團體,信託"]];
+  const _questionLinks={};
+  function normFact(s){return String(s||'').replace(/[\s，,。！？!?、:：；;（）()\[\]]/g,'').toLowerCase().slice(0,420)}
+  function overlapFact(a,b){let aa=normFact(a),bb=normFact(b);if(!aa||!bb)return 0;let a2=new Set(),b2=new Set();for(let i=0;i<aa.length-1;i++)a2.add(aa.slice(i,i+2));for(let i=0;i<bb.length-1;i++)b2.add(bb.slice(i,i+2));let common=0;for(let x of b2)if(a2.has(x))common++;return 2*common/(a2.size+b2.size||1)}
+  const _indexes={};
+  function questionsForChapter(ch){
+    let cache=_indexes[ch.id];if(cache)return cache;
+    let list=qOf(ch),parts=ch.topics.map(()=>[]),extra=[];
+    for(const q of list){let raw=q.stem+' '+(q.options[q.answer-1]||'')+' '+String(q.explanation||'').slice(0,90),best=-1,highest=0;
+      for(let i=0;i<ch.topics.length;i++){
+        const topic=ch.topics[i];let score=overlapFact(raw,topic.title+' '+topic.definition+' '+topic.trap);
+        for(const tag of (CONCEPT_TAGS[ch.id]?.[i]||'').split(','))if(tag&&raw.includes(tag))score+=.12;
+        for(const qid of topic.refs){const ref=qMap[qid];if(!ref)continue;if(ref.id===q.id)score+=1;else score=Math.max(score,overlapFact(q.stem,ref.stem)*.8)}
+        if(score>highest){highest=score;best=i}
+      }
+      if(highest>=.07&&best>=0)parts[best].push(q);
+      else extra.push(q);
+    }
+    return _indexes[ch.id]={parts,extra,count:list.length};
+  }
+  function weakFact(q){
+    return !q.explanation||q.explanation.includes('原 PDF 此題未附逐題解析')||q.explanation.replace(/\s/g,'').length<=12||/^以上皆(?:是|正確)|^請參考上一題解析/.test(q.explanation.replace(/\s/g,''));
+  }
+  function isNegative(q){
+    return /何者(?:為非|錯誤|不正確|有誤|不屬於|不是)|下列.*(?:錯誤|不正確)|何項不/.test(q.stem);
+  }
+  function qbTitle(q){return q.stem.replace(/\s+/g,' ').trim().slice(0,230)}
+  function answerKey(q){const selected=q.options[q.answer-1]||'請參考原題';return (isNegative(q)?'題庫認定錯誤的選項':'題庫正確答案')+'：（'+q.answer+'）'+selected}
+  function answerParagraph(q,topic){
+    const weak=weakFact(q);
+    const explain=weak?'<p class="ans-weak"><strong>解析尚待補全：</strong>原始 PDF 未提供足夠的逐題說明，不會把答案當成已查證的正確法規。'+(topic?'先閱讀本節「'+esc(topic.title)+'」的定義、案例，再對照其他題目判斷。':'先核對本題所考的條款、年份與題幹限制。')+'</p>':'<p><strong>題庫原解析：</strong>'+esc(q.explanation).replace(/\n/g,'<span class="fact-newline"></span>')+'</p>';
+    const caution=q.caution||/第\s*\d+\s*條|\d+[年％%]|扣除額|免稅額|現行|最新/.test(q.stem);
+    return `<details class="answer-detail" id="bank-${esc(q.id)}"><summary><span class="ans-serial">${esc(q.id)}</span> ${esc(qbTitle(q))}</summary><div class="ans-inside"><p><strong>${isNegative(q)?'這題要找錯誤敘述':'考試答案'}：</strong> ${esc(answerKey(q))}</p>${explain}${caution?'<p class="ans-caution">⚠ 本題含法定數字、年份或可能變動的規範，考試時請核對適用年度。</p>':''}<p class="ans-source">${esc(q.source)} · 原 PDF 第 ${q.page} 頁 · ${esc(q.subject)} ${esc(q.chapter)}</p><button class="btn small soft" data-action="one" data-id="${esc(q.id)}">到題庫測驗這一題 →</button></div></details>`;
+  }
+  function synthesis(ch){
+    const points=SOURCE_INSIGHTS[ch.id]||[];
+    return `<section class="ans-summary"><div class="art-brow">依原題庫答案整理 · 本章重要結論</div><h2>這一章，題庫實際在考什麼？</h2><p>下列結論是從指定題號的答案與解析重新歸納，不是外部筆記逐字貼上；點選題號可練習驗證。舊年度數字仍以來源題庫為準，不表示符合 115 年最新規定。</p>${points.map(([line,id],i)=>{const q=qMap[id];return `<div class="ans-take"><span class="ans-num">${String(i+1).padStart(2,'0')}</span><div><p>${esc(line)}</p>${q?`<button class="btn small soft" data-action="one" data-id="${esc(q.id)}">原題 ${esc(q.id)} · PDF p.${q.page}</button>`:''}</div></div>`}).join('')}</section>`;
+  }
+  function detailedBank(topic,ch,qs){
+    if(!qs.length)return '';
+    const have=qs.filter(q=>!weakFact(q));const missing=qs.length-have.length;
+    const choice=have.filter(q=>q.explanation.length>=28).slice(0,Math.min(4,have.length));
+    return `<div class="answer-knowledge"><h3>從這個觀念延伸的題庫答案</h3><p>本節涵蓋 <strong>${qs.length} 題</strong>，其中 ${have.length} 題有可用的原始解析，${missing} 題原始說明不足。先讀題庫歸納，再展開每一道題的正解與原解析。</p>${choice.map(q=>`<div class="ans-learn"><span>原題 ${esc(q.id)} 的答案解析</span><p>${esc(q.explanation.slice(0,290))}</p><button class="btn small soft" data-action="one" data-id="${esc(q.id)}">練習本題</button></div>`).join('')}<details class="ans-all"><summary>展開本節全部 ${qs.length} 題的答案與解析</summary><div class="ans-list">${qs.map(q=>answerParagraph(q,topic)).join('')}</div></details></div>`;
+  }
+  function ungroupedBank(ch){
+    const extra=questionsForChapter(ch).extra;
+    if(!extra.length)return '';
+    return `<section class="art-section ans-extra"><span class="art-step">跨題延伸 · ${extra.length} 題</span><h2>本章其他考點與補充答案</h2><p>這些題目確實收在本章來源題庫，但與前面單一觀念的關聯較弱，因此獨立保存，不硬套錯誤分類。所有題目的原答案及來源解析仍可展開查閱。</p><details class="ans-all"><summary>展開本章 ${extra.length} 題補充答案</summary>${extra.map(q=>answerParagraph(q,null)).join('')}</details></section>`;
+  }
+
   function section(t,i){
     const related=t.refs.map(id=>qMap[id]).filter(Boolean).slice(0,5);
-    return `<section class="art-section" id="article-topic-${esc(t.id)}"><span class="art-step">觀念 ${String(i+1).padStart(2,"0")} / ${String(t.title.length ? CH.find(x=>x.topics.includes(t)).topics.length:0).padStart(2,"0")}</span><h2>${esc(t.title)}</h2><p>讀這個觀念時，最重要的是先理解它如何判斷：${esc(t.definition)}</p><div class="art-case"><span class="mini">生活案例｜把抽象題目換成真實情況</span><p>${esc(t.example)}</p></div><p class="art-avoid"><strong>常見錯法：</strong>${esc(t.trap)}</p>${related.length?`<p style="font-size:13px;color:#677b7a">對應題庫：${related.map(q=>`<button class="btn small" data-action="one" data-id="${q.id}">#${esc(q.number)} ${esc(q.source).slice(0,6)}</button>`).join(" ")}</p>`:""}</section>`;
+    return `<section class="art-section" id="article-topic-${esc(t.id)}"><span class="art-step">觀念 ${String(i+1).padStart(2,"0")} / ${String(t.title.length ? CH.find(x=>x.topics.includes(t)).topics.length:0).padStart(2,"0")}</span><h2>${esc(t.title)}</h2><p>讀這個觀念時，最重要的是先理解它如何判斷：${esc(t.definition)}</p><div class="art-case"><span class="mini">生活案例｜把抽象題目換成真實情況</span><p>${esc(t.example)}</p></div><p class="art-avoid"><strong>常見錯法：</strong>${esc(t.trap)}</p>${related.length?`<p style="font-size:13px;color:#677b7a">對應題庫：${related.map(q=>`<button class="btn small" data-action="one" data-id="${q.id}">#${esc(q.number)} ${esc(q.source).slice(0,6)}</button>`).join(" ")}</p>`:""}${detailedBank(t,CH.find(x=>x.topics.includes(t)),questionsForChapter(CH.find(x=>x.topics.includes(t))).parts[i])}</section>`;
   }
   function bookView(){
     const ch=CH.find(l=>l.id===S.chapter && (S.subject==="全部"||l.subject===S.subject));
@@ -402,7 +481,7 @@ const originalSetSubject=setSubject;setSubject=function(sub){if(S.view==='notes'
     const g=STORY[ch.id]||{}, cases=caseQ(ch);
     const i=CH.indexOf(ch);
     const prev=CH[i-1],next=CH[i+1];
-    return `<article class="art-article"><div class="art-mast"><button class="btn small" data-action="book-index">← 全部文章</button><span class="art-step" style="margin-top:20px">${esc(ch.subject)} · 第 ${i+1} / ${CH.length} 章 · ${qOf(ch).length} 題</span><h1>${esc(ch.chapter)}</h1><p class="art-lead">${esc(ch.overview)}</p><div class="actions"><button class="btn primary" data-action="book-quiz" data-id="${ch.id}">本章題庫練習 (${qOf(ch).length} 題) →</button><button class="btn" data-action="book-mark" data-id="${ch.id}">✓ 標記本章觀念已閱讀</button><button class="btn" data-action="print">列印文章</button></div></div><p class="art-intro">${esc(g.intro||ch.overview)}</p><div class="art-story"><b>📖 章節貫穿案例</b><p>${esc(g.story||ch.overview)}</p></div><div class="art-warning"><strong>考前記憶方式：</strong>${esc(g.memory||"先分辨定義、適用條件，再用題庫檢查。")}</div><nav class="art-outline">${ch.topics.map((t,j)=>`<a href="#article-topic-${esc(t.id)}">${j+1}. ${esc(t.title)}</a>`).join("")}</nav><div style="padding-top:25px"><span class="art-brow">PART 01 · 理解觀念</span><h2>把考題變成可以理解的文章</h2></div>${ch.topics.map(section).join("")}<div class="art-story"><b>🧭 這一章最容易失分的地方</b><p>${esc(g.bridge||"遇到似是而非的答案，先看適用條件與當事人，再找出題目真正問什麼。")}</p></div><div style="margin:35px 0 15px"><span class="art-brow">PART 02 · 題庫案例推演</span><h2>用原題確認是否真正理解</h2><p>下面挑出與這章觀念相對應的代表題目。點開後先比較題庫正解，再閱讀原檔解析。原 PDF 沒有解析的題目不會假裝已經完成官方法規核對。</p></div>${cases.map(oneCase).join("")}<div class="art-next"><h3 style="color:#fff">讀完了，接著用題庫驗證吧</h3><p>本章 ${qOf(ch).length} 道題目仍在原互動題庫中。答錯會沿用既有的錯題紀錄，已完成的學習進度不會清除。</p><div class="actions"><button class="btn" data-action="book-quiz" data-id="${ch.id}">開始本章測驗 →</button>${prev?`<button class="btn" data-action="book-open" data-id="${prev.id}">← 上一章</button>`:""}${next?`<button class="btn" data-action="book-open" data-id="${next.id}">下一章 →</button>`:""}</div></div><div class="art-source">${sourceHtml()}</div></article>`;
+    return `<article class="art-article"><div class="art-mast"><button class="btn small" data-action="book-index">← 全部文章</button><span class="art-step" style="margin-top:20px">${esc(ch.subject)} · 第 ${i+1} / ${CH.length} 章 · ${qOf(ch).length} 題</span><h1>${esc(ch.chapter)}</h1><p class="art-lead">${esc(ch.overview)}</p><div class="actions"><button class="btn primary" data-action="book-quiz" data-id="${ch.id}">本章題庫練習 (${qOf(ch).length} 題) →</button><button class="btn" data-action="book-mark" data-id="${ch.id}">✓ 標記本章觀念已閱讀</button><button class="btn" data-action="print">列印文章</button></div></div><p class="art-intro">${esc(g.intro||ch.overview)}</p><div class="art-story"><b>📖 章節貫穿案例</b><p>${esc(g.story||ch.overview)}</p></div><div class="art-warning"><strong>考前記憶方式：</strong>${esc(g.memory||"先分辨定義、適用條件，再用題庫檢查。")}</div><nav class="art-outline">${ch.topics.map((t,j)=>`<a href="#article-topic-${esc(t.id)}">${j+1}. ${esc(t.title)}</a>`).join("")}</nav>${synthesis(ch)}<div style="padding-top:25px"><span class="art-brow">PART 01 · 理解觀念</span><h2>把考題變成可以理解的文章</h2></div>${ch.topics.map(section).join("")}${ungroupedBank(ch)}<div class="art-story"><b>🧭 這一章最容易失分的地方</b><p>${esc(g.bridge||"遇到似是而非的答案，先看適用條件與當事人，再找出題目真正問什麼。")}</p></div><div style="margin:35px 0 15px"><span class="art-brow">PART 02 · 題庫案例推演</span><h2>用原題確認是否真正理解</h2><p>下面挑出與這章觀念相對應的代表題目。點開後先比較題庫正解，再閱讀原檔解析。原 PDF 沒有解析的題目不會假裝已經完成官方法規核對。</p></div>${cases.map(oneCase).join("")}<div class="art-next"><h3 style="color:#fff">讀完了，接著用題庫驗證吧</h3><p>本章 ${qOf(ch).length} 道題目仍在原互動題庫中。答錯會沿用既有的錯題紀錄，已完成的學習進度不會清除。</p><div class="actions"><button class="btn" data-action="book-quiz" data-id="${ch.id}">開始本章測驗 →</button>${prev?`<button class="btn" data-action="book-open" data-id="${prev.id}">← 上一章</button>`:""}${next?`<button class="btn" data-action="book-open" data-id="${next.id}">下一章 →</button>`:""}</div></div><div class="art-source">${sourceHtml()}</div></article>`;
   }
   document.addEventListener("click",function(e){
     const el=e.target.closest("[data-action]");if(!el)return;
