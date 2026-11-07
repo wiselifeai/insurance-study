@@ -85,6 +85,45 @@
 .ans-extra{margin-top:30px}.fact-newline{display:block}
 @media(max-width:700px){.ans-summary,.answer-knowledge{padding:20px 15px}.ans-take{gap:8px}.ans-list{padding:4px 8px 12px}}
 
+
+/* 全題通關挑戰 v1：保持原站字體與版型，避免改變原有考題及教材 */
+.challenge-banner{padding:25px 27px;margin:23px 0;background:linear-gradient(125deg,#153c40,#22625b);color:#fff;border-radius:20px;border:1px solid #3f7a72}
+.challenge-banner h2{font-size:clamp(22px,3vw,30px);margin:7px 0 11px;color:#fff}
+.challenge-banner p{color:#e1f2ec;max-width:800px;line-height:1.8;margin:5px 0 13px}
+.challenge-banner .btn{background:#f9fff9;color:#19544a;border:0}
+.challenge-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.challenge-stat{background:#fff;border:1px solid #dce9e4;border-radius:15px;padding:19px 16px}
+.challenge-stat strong{display:block;font-size:clamp(24px,3vw,34px);font-weight:850;color:#174a44;line-height:1.2}
+.challenge-stat span{font-size:13px;color:#6d7e7a;line-height:1.7}
+.challenge-progress{height:12px;background:#e0eae6;border-radius:99px;overflow:hidden;margin:12px 0 7px}
+.challenge-progress span{display:block;height:100%;background:linear-gradient(90deg,#1c8b7d,#69ae89);border-radius:99px}
+.challenge-sub{font-size:13px;color:#71807c;margin-top:8px}
+.challenge-card{padding:21px;margin:20px 0;background:#fff;border:1px solid #dee8e2;border-radius:17px}
+.challenge-card h2{font-size:19px;margin:0 0 13px}
+.challenge-btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.challenge-table{display:grid;gap:10px;margin:13px 0}
+.challenge-unit{display:flex;align-items:center;justify-content:space-between;gap:15px;border:1px solid #e0e9e4;border-radius:12px;padding:13px 15px;background:#fdfefd}
+.challenge-unit strong{font-size:14px}.challenge-unit .small{color:#627774;font-size:12px}
+.challenge-unit .challenge-progress{height:6px;margin:5px 0}
+.challenge-unit .btn{flex-shrink:0}
+.challenge-note{font-size:14px;line-height:1.85;color:#516962;margin:14px 0}
+.challenge-indicator{margin:0 0 14px;padding:13px 17px;border-radius:12px;background:#eff7f4;border:1px solid #d4e7df;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.challenge-indicator strong{color:#155c52;font-size:13px}.challenge-indicator span{font-size:12px;color:#507068}
+.challenge-done{padding:34px 22px;text-align:center;background:#f1f8f4;border:1px solid #d6e9df;border-radius:17px;margin:20px 0}
+.challenge-done h2{font-size:26px;color:#215b50}
+.mistake-card{background:#fff;border:1px solid #d3e2dc;border-radius:22px;padding:25px;max-width:800px;margin:20px auto;min-height:260px}
+.mistake-card .mistake-label{font-size:12px;color:#458078;font-weight:800;letter-spacing:.035em}
+.mistake-card h2{font-size:21px;line-height:1.55;margin:12px 0}
+.mistake-card p{line-height:1.9;color:#395454;font-size:15px;white-space:pre-line}
+.mistake-card .mistake-bad{background:#fff7ed;border-left:3px solid #b87a34;padding:13px 16px;border-radius:10px}
+.mistake-card .mistake-good{background:#eef8f2;border-left:3px solid #237b64;padding:13px 16px;border-radius:10px}
+.mistake-card .mistake-foot{font-size:12px;color:#7a8a85}
+.mistake-pills{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.mistake-pill{font-size:12px;padding:6px 9px;border:1px solid #d3e4db;border-radius:99px;color:#375f54}
+.mistake-pill.active{background:#e3f3ea;border-color:#79b39c;font-weight:800}
+@media(max-width:850px){.challenge-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.challenge-unit{align-items:flex-start;flex-direction:column}.challenge-card,.challenge-banner{padding:20px 16px}.mistake-card{padding:19px 16px}.challenge-stat{padding:14px}}
+@media print{.challenge-btnrow,.challenge-banner .btn{display:none!important}}
+
 </style>
 </head><body>
 <div class="app"><aside id="sidebar" class="sidebar"><div class="brand"><div class="mark">保</div><div><strong>保險學習所</strong><small>人身保險業務員｜應考專區</small></div></div><div id="sidenav"></div><div class="sidebar-footer">依據你提供的兩本精選題庫整理。<br>答題資料只儲存在此瀏覽器。<br>法規及稅額請考前查核現行規定。</div></aside>
@@ -501,5 +540,227 @@ const originalSetSubject=setSubject;setSubject=function(sub){if(S.view==='notes'
     else{S.subject="全部";S.chapter=null;S.view="articles";}
   }
 })();
+
+;(function marathonAddon(){
+  'use strict';
+  // 全題通關挑戰 v1：不重設 insurance-study-v2；進度直接納入既有備份機制。
+  const COUNT=Q.length;
+  const ordered=CH.flatMap(ch=>Q.filter(q=>q.subject===ch.subject&&q.chapter===ch.chapter).map(q=>q.id));
+  const idsAll=[...new Set([...ordered,...Q.map(q=>q.id)])];
+  S.mistakeCardIndex=0;S.mistakeFlipped=false;S.mistakeFilter='active';
+  function ensure(){
+    if(!persist.fullRun||typeof persist.fullRun!=='object')persist.fullRun={version:1,round:1,startedAt:new Date().toISOString(),completed:{}};
+    if(!persist.fullRun.completed||typeof persist.fullRun.completed!=='object')persist.fullRun.completed={};
+    if(!persist.mistakeBank||typeof persist.mistakeBank!=='object')persist.mistakeBank={};
+    // 舊版錯題資料保留為待熟練卡，而非重新要求使用者匯入。
+    for(const id of new Set([...Object.keys(persist.wrong||{}),...Object.keys(persist.solved||{}).filter(k=>persist.solved[k]?.last===false)])){
+      if(!qMap[id]||persist.mistakeBank[id])continue;
+      persist.mistakeBank[id]={timesWrong:1,reviewStreak:0,mastered:false,lastWrongChoice:null,lastWrongAt:null,reviews:0,legacy:true};
+    }
+  }
+  ensure();
+  function done(){ensure();return idsAll.filter(id=>persist.fullRun.completed[id]).length}
+  function remaining(){ensure();return idsAll.filter(id=>!persist.fullRun.completed[id])}
+  function stats(){
+    ensure();
+    const solved=done(),rest=COUNT-solved;
+    const entries=Object.entries(persist.mistakeBank).filter(([id])=>!!qMap[id]);
+    const active=entries.filter(([id,r])=>!r.mastered),mastered=entries.length-active.length;
+    const allDone=Object.values(persist.fullRun.completed);
+    const firstCorrect=allDone.filter(x=>x&&x.right).length;
+    return {solved,rest,firstCorrect,firstWrong:solved-firstCorrect,missed:entries.length,active:active.length,mastered};
+  }
+  function progress(a,b){return '<div class="challenge-progress"><span style="width:'+Math.min(100,Math.round(a/(b||1)*100))+'%"></span></div>'}
+  function metrics(st){
+    return '<div class="challenge-stats">'+[
+      [''+st.solved+' / '+COUNT,'首次通關已完成'],
+      [String(st.rest),'尚未挑戰'],
+      [String(st.active),'待熟練錯題'],
+      [String(st.mastered),'已熟練錯題']
+    ].map(([x,label])=>'<div class="challenge-stat"><strong>'+x+'</strong><span>'+label+'</span></div>').join('')+'</div>';
+  }
+  function dashboard(){
+    const st=stats(),finish=st.rest===0;
+    let rows=CH.map(ch=>{
+      const ids=Q.filter(q=>q.subject===ch.subject&&q.chapter===ch.chapter).map(q=>q.id);
+      const count=ids.filter(id=>persist.fullRun.completed[id]).length;
+      return '<div class="challenge-unit"><div style="min-width:0;flex:1"><strong>'+esc(ch.subject)+' · '+esc(ch.chapter)+'</strong><div class="small">'+count+' / '+ids.length+' 題已完成</div>'+progress(count,ids.length)+'</div><button class="btn small" data-action="marathon-chapter" data-id="'+ch.id+'" '+(count===ids.length?'disabled':'')+'>'+(count===ids.length?'本章完成':'從本章繼續')+'</button></div>';
+    }).join('');
+    const tip=finish?'<div class="challenge-done"><div style="font-size:32px">🏆</div><h2>全題 1,094 題，第一輪完成！</h2><p>這一輪已經把所有題目做過一次。接下來集中練習待熟練的錯題，讓正確觀念留下來。</p><div class="challenge-btnrow" style="justify-content:center"><button class="btn primary" data-action="mistake-review" data-count="20">複習待熟練錯題</button><button class="btn" data-action="mistake-page">我的錯題記憶卡</button></div></div>':
+     '<div class="challenge-card"><h2>從未做過的題目繼續</h2><p class="challenge-note">這是獨立的「完整一輪」進度。每一題第一次作答就記錄完成，即使答錯也算已挑戰；錯題另外送進重練系統，不會在首次通關時混入重複題。</p><div class="challenge-btnrow"><button class="btn primary" data-action="marathon-start" data-count="20">繼續 20 題 →</button><button class="btn" data-action="marathon-start" data-count="50">練 50 題</button><button class="btn" data-action="marathon-start" data-count="100">練 100 題</button></div></div>';
+    return '<div class="eyebrow">ALL QUESTIONS · ONE COMPLETE ROUND</div><h1 class="h1">1,094 題全題通關挑戰</h1><p class="lead">從未作答的題目開始，一題不漏；錯題自動進入「錯題重練」與「個人觀念記憶卡」。</p>'+metrics(st)+progress(st.solved,COUNT)+'<div class="challenge-sub">第一輪完成率 '+pct(st.solved,COUNT)+'% · 第一輪答對 '+st.firstCorrect+' 題、答錯 '+st.firstWrong+' 題 · 第 '+persist.fullRun.round+' 輪</div>'+tip+
+     '<div class="challenge-card"><h2>各章進度</h2><div class="challenge-table">'+rows+'</div></div>'+
+     '<div class="challenge-card"><h2>錯題也要反覆練熟</h2><p class="challenge-note">答錯題目會留下記錄，之後必須在「錯題重練」中連續兩次答對，才會標示為已熟練。即使熟練，歷史錯題及個人記憶卡仍保留。</p><div class="challenge-btnrow"><button class="btn primary" data-action="mistake-review" data-count="20">重練待熟練錯題（'+st.active+'）</button><button class="btn" data-action="mistake-page">查看錯題記憶卡</button></div></div>'+
+     '<div class="challenge-note">進度只存在本瀏覽器，換裝置不會自動同步。你可以在「考前規劃」裡使用匯出／匯入備份。重新開始一輪只會重設「全題通關」計數，不會刪除舊測驗、錯題與熟練紀錄。</div>'+
+     '<button class="btn small ghost" data-action="marathon-restart">重新開始一輪（需確認）</button>';
+  }
+  function startBlock(mode,count,chId){
+    ensure();let list;
+    if(mode==='marathon'){
+      list=remaining();
+      if(chId!==undefined&&chId!==null){
+        const ch=CH.find(l=>l.id===Number(chId));
+        if(ch)list=list.filter(id=>qMap[id].subject===ch.subject&&qMap[id].chapter===ch.chapter);
+      }
+      if(!list.length){toast('這個範圍的題目都做過了');S.view='marathon';render();return}
+    }else{
+      list=Object.entries(persist.mistakeBank).filter(([id,rec])=>qMap[id]&&!rec.mastered).sort((a,b)=>(a[1].lastReviewAt||'').localeCompare(b[1].lastReviewAt||'')).map(([id])=>id);
+      if(chId&&qMap[chId])list=list.filter(id=>id===chId);
+      if(!list.length){toast('目前沒有待熟練錯題');S.view='mistake-cards';render();return}
+    }
+    const size=Math.min(Math.max(1,Number(count)||20),100);
+    S.quizIds=list.slice(0,size);
+    S.qIndex=0;S.selected=null;S.sessionCorrect=0;S.sessionCount=0;
+    S.quizType=mode==='marathon'?'marathon':'mistake-course';
+    S.view='quiz';render();scrolltop();
+  }
+  function recordAnswer(v,q,mode){
+    ensure();const right=v===q.answer,now=new Date().toISOString();
+    if(mode==='marathon'&&!persist.fullRun.completed[q.id]){
+      persist.fullRun.completed[q.id]={right,chosen:v,at:now};
+    }
+    const previous=persist.mistakeBank[q.id];
+    if(!right){
+      persist.mistakeBank[q.id]={
+        timesWrong:Math.max(0,Number(previous?.timesWrong)||0)+1,
+        reviewStreak:0,mastered:false,lastWrongChoice:v,lastWrongAt:now,
+        lastReviewAt:mode==='mistake-course'?now:(previous?.lastReviewAt||null),
+        reviews:(Number(previous?.reviews)||0)+(mode==='mistake-course'?1:0)
+      };
+    }else if(previous&&mode==='mistake-course'){
+      const streak=Math.min(2,(Number(previous.reviewStreak)||0)+1);
+      persist.mistakeBank[q.id]={...previous,reviewStreak:streak,mastered:streak>=2,lastReviewAt:now,reviews:(Number(previous.reviews)||0)+1};
+    }
+    save();
+  }
+  const oldAnswer=answer;
+  answer=function(v){
+    const q=qMap[S.quizIds[S.qIndex]],mode=S.quizType,unanswered=S.selected===null;
+    oldAnswer(v);
+    if(unanswered&&q&&Number.isInteger(v)&&v>=1&&v<=4){
+      recordAnswer(v,q,mode);render();
+    }
+  };
+  const oldQuizQuestion=quizQuestion;
+  quizQuestion=function(){
+    let h=oldQuizQuestion();
+    if(!S.quizIds?.length||!['marathon','mistake-course'].includes(S.quizType))return h;
+    const q=qMap[S.quizIds[S.qIndex]],s=stats();
+    const rec=persist.mistakeBank[q.id];
+    const title=S.quizType==='marathon'?'全題通關 · 本回 '+S.quizIds.length+' 題':'錯題重練 · 連續答對 2 回才能熟練';
+    const sub=S.quizType==='marathon'?'全題已完成 '+s.solved+' / '+COUNT+' · 尚餘 '+s.rest+' 題':'本題熟練進度 '+(rec?.reviewStreak||0)+' / 2 · 待熟練 '+s.active+' 題';
+    const b='<div class="challenge-indicator"><strong>'+title+'</strong><span>'+sub+'</span></div>';
+    return b+h;
+  };
+  const oldEnd=endQuiz;
+  endQuiz=function(){
+    if(!['marathon','mistake-course'].includes(S.quizType))return oldEnd();
+    const st=stats(),isAll=S.quizType==='marathon';
+    return '<div class="challenge-done"><div style="font-size:34px">📚</div><h2>'+(isAll?'完成這回全題挑戰':'完成這回錯題重練')+'</h2><p>本回答對 '+S.sessionCorrect+' / '+S.sessionCount+' 題，正確率 '+pct(S.sessionCorrect,S.sessionCount)+'%。</p><p>'+(isAll?'1,094 題首次通關進度 '+st.solved+' / '+COUNT+' 題。':'目前還有 '+st.active+' 題尚未達到連續兩回答對；已有 '+st.mastered+' 題熟練。')+'</p><div class="challenge-btnrow" style="justify-content:center">'+(isAll&&st.rest?'<button class="btn primary" data-action="marathon-start" data-count="20">繼續下一回 20 題 →</button>':'')+'<button class="btn" data-action="challenge-home">查看總進度</button><button class="btn" data-action="mistake-page">錯題記憶卡</button><button class="btn" data-action="mistake-review" data-count="20">錯題再練 20 題</button></div></div>';
+  };
+  function mistakeTopic(q){
+    let l=CH.find(ch=>ch.subject===q.subject&&ch.chapter===q.chapter);
+    if(!l)return null;
+    const exact=l.topics.find(t=>(t.refs||[]).includes(q.id));
+    if(exact)return exact;
+    // 有明確匹配才推薦教材。弱相關題僅保留原 PDF 題解，避免誤教。
+    const text=q.stem+' '+(q.options[q.answer-1]||'');
+    let result=null,max=0;
+    for(const t of l.topics){
+      const terms=[t.title,...(t.title.match(/[一-鿿]{2,4}/g)||[])];
+      const matched=terms.filter(x=>x.length>=2&&text.includes(x)).length;
+      if(matched>max){max=matched;result=t}
+    }
+    return max>=1?result:null;
+  }
+  function isNeg(q){return /何者(?:為非|錯誤|不正確|有誤|不屬於|不是)|下列.*(?:錯誤|不正確)|何項不/.test(q.stem)}
+  function originalWeak(q){return !q.explanation||q.explanation.includes('原 PDF 此題未附逐題解析')||q.explanation.replace(/\s/g,'').length<=12||/^以上皆(?:是|正確)|^請參考上一題解析/.test(q.explanation.replace(/\s/g,''))}
+  function mistakeList(){
+    ensure();let ids=Object.keys(persist.mistakeBank).filter(id=>qMap[id]);
+    if(S.mistakeFilter==='active')ids=ids.filter(id=>!persist.mistakeBank[id].mastered);
+    if(S.mistakeFilter==='mastered')ids=ids.filter(id=>persist.mistakeBank[id].mastered);
+    ids.sort((a,b)=>(persist.mistakeBank[b].lastWrongAt||'').localeCompare(persist.mistakeBank[a].lastWrongAt||''));
+    return ids;
+  }
+  function cardBack(q,rec){
+    const chosen=q.options[q.answer-1]||'（請核對原題庫）';
+    const mistaken=rec.lastWrongChoice>=1&&rec.lastWrongChoice<=4?q.options[rec.lastWrongChoice-1]:'';
+    const negative=isNeg(q),topic=mistakeTopic(q),weak=originalWeak(q);
+    return '<div class="mistake-label">背面 · 找出錯誤背後的觀念</div>'+
+      '<h2>'+esc(negative?'這題要找「錯誤的說法」，不要把它當正確知識':'先說出為什麼這項才符合題意')+'</h2>'+
+      (mistaken?'<p class="mistake-bad"><strong>你上次誤選：</strong>'+esc(mistaken)+'</p>':'')+
+      '<p class="mistake-good"><strong>'+(negative?'原題庫判定為錯誤的敘述':'原題庫正確選項')+'：</strong>第 '+q.answer+' 項「'+esc(chosen)+'」</p>'+
+      (weak?'<p class="mistake-bad">⚠ 原始 PDF 缺乏可核實的逐題解釋，此處保留原答案，並不代表已經查證為現行法規。</p>':'<p><strong>原題庫解析：</strong>'+esc(q.explanation)+'</p>')+
+      (topic?'<div class="mistake-good"><strong>對應觀念｜'+esc(topic.title)+'</strong><p>'+esc(topic.definition)+'</p><p><strong>生活案例：</strong>'+esc(topic.example)+'</p><p><strong>常見混淆：</strong>'+esc(topic.trap)+'</p></div>':'<p class="mistake-foot">尚無能可靠對應的單一教材觀念。建議閱讀本章完整文章，確認原題條件。</p>')+
+      (q.caution||/扣除額|稅額|第\s*\d+\s*條|\d+[％%年月]|最新|現行/.test(q.stem)?'<p class="mistake-bad">⚠ 舊版題庫可能有法規時效差異，請對照適用年度的主管機關規定。</p>':'')+
+      '<div class="mistake-foot">'+esc(q.source)+' · 原 PDF p.'+q.page+' · '+esc(q.id)+'</div>';
+  }
+  function mistakeDeck(){
+    const st=stats(),ids=mistakeList();
+    S.mistakeCardIndex=Math.max(0,Math.min(S.mistakeCardIndex,ids.length-1));
+    const id=ids[S.mistakeCardIndex],q=qMap[id],rec=persist.mistakeBank[id];
+    const tabs=['active','all','mastered'].map((x,i)=>'<button class="btn small '+(S.mistakeFilter===x?'soft':'')+'" data-action="mistake-filter" data-val="'+x+'">'+['待熟練','所有曾錯','已熟練'][i]+'</button>').join('');
+    let header='<div class="eyebrow">PERSONAL MISTAKE FLASHCARDS</div><h1 class="h1">我的錯題觀念記憶卡</h1><p class="lead">每張卡來自你真正答錯的題目。正面回想題意與上次誤選，翻面對照題庫答案、原解析及相關觀念，再重測到連續兩次答對。</p>'+
+      '<div class="challenge-stats"><div class="challenge-stat"><strong>'+st.missed+'</strong><span>歷史錯題</span></div><div class="challenge-stat"><strong>'+st.active+'</strong><span>待熟練</span></div><div class="challenge-stat"><strong>'+st.mastered+'</strong><span>已熟練</span></div><div class="challenge-stat"><strong>'+pct(st.mastered,st.missed||1)+'%</strong><span>錯題熟練率</span></div></div>'+
+      '<div class="challenge-btnrow">'+tabs+'<button class="btn primary" data-action="mistake-review" data-count="20">重測待熟練錯題</button><button class="btn" data-action="challenge-home">全題總進度</button></div>';
+    if(!q)return header+'<div class="challenge-done"><div style="font-size:32px">📗</div><h2>這個分類目前沒有錯題卡</h2><p>先到全題通關完成題目；答錯的題目會自動加入這裡。已熟練的卡片仍保存在「所有曾錯」清單。</p><button class="btn primary" data-action="challenge-home">開始全題挑戰 →</button></div>';
+    const front='<div class="mistake-label">正面 · 先別看答案</div><div class="mistake-pills"><span class="mistake-pill">'+esc(q.subject)+'</span><span class="mistake-pill">'+esc(q.chapter)+'</span><span class="mistake-pill">連續答對 '+(rec.reviewStreak||0)+' / 2</span></div><h2>'+esc(q.stem)+'</h2><p>先用自己的話說明這題考什麼、上次錯在哪裡，然後再翻面檢查。</p>';
+    return header+'<div class="challenge-sub">第 '+(S.mistakeCardIndex+1)+' / '+ids.length+' 張 · 曾答錯 '+(rec.timesWrong||1)+' 次 · 重練 '+(rec.reviews||0)+' 回</div>'+
+     '<section class="mistake-card">'+(S.mistakeFlipped?cardBack(q,rec):front)+'</section>'+
+     '<div class="challenge-btnrow" style="justify-content:center"><button class="btn" data-action="mistake-prev" '+(S.mistakeCardIndex===0?'disabled':'')+'>← 上一張</button><button class="btn soft" data-action="mistake-flip">'+(S.mistakeFlipped?'翻回正面':'翻面看觀念')+'</button><button class="btn" data-action="mistake-next" '+(S.mistakeCardIndex>=ids.length-1?'disabled':'')+'>下一張 →</button><button class="btn primary" data-action="mistake-single" data-id="'+esc(id)+'">重測這一題</button></div>'+
+     '<p class="challenge-note">「翻面」只幫助理解，不會自動改為已熟練。必須在錯題重練中連續兩回答對才會完成；已熟練的歷史卡不會刪除。</p>';
+  }
+  const oldNav=nav;
+  nav=function(){
+    oldNav();const box=document.getElementById('sidenav');
+    const anchor=box.querySelector('[data-action="nav"][data-to="quiz"]');
+    if(anchor)anchor.insertAdjacentHTML('afterend','<button class="navbtn '+(S.view==='marathon'?'active':'')+'" data-action="challenge-home"><span class="navicon">◎</span>1,094 題全題通關<span class="navcount">'+stats().solved+'</span></button><button class="navbtn '+(S.view==='mistake-cards'?'active':'')+'" data-action="mistake-page"><span class="navicon">▧</span>我的錯題記憶卡<span class="navcount">'+stats().active+'</span></button>');
+  };
+  const oldBreadcrumb=breadcrumbs;
+  breadcrumbs=function(){oldBreadcrumb();if(S.view==='marathon')document.getElementById('breadcrumb').textContent='考題練習 / 全題通關';if(S.view==='mistake-cards')document.getElementById('breadcrumb').textContent='錯題複習 / 個人記憶卡';};
+  const oldRender=render;
+  render=function(){
+    if(S.view==='marathon'||S.view==='mistake-cards'){
+      nav();breadcrumbs();document.getElementById('appview').innerHTML=S.view==='marathon'?dashboard():mistakeDeck();
+    }else oldRender();
+  };
+  const oldHome=home;
+  home=function(){
+    const h=oldHome(),s=stats();
+    const b='<section class="challenge-banner"><div class="eyebrow" style="color:#bad8c8">EXAM MISSION · 全題通關</div><h2>1,094 題，一題不漏完成一輪</h2><p>目前已完成 '+s.solved+' / '+COUNT+' 題，還有 '+s.rest+' 題待挑戰。答錯會自動變成個人觀念記憶卡，重測連續兩回答對才算熟練。</p>'+
+      progress(s.solved,COUNT)+'<div class="challenge-btnrow"><button class="btn" data-action="challenge-home">開始／繼續全題挑戰 →</button><button class="btn" data-action="mistake-page">我的錯題記憶卡（'+s.active+'）</button></div></section>';
+    return b+h;
+  };
+  document.addEventListener('click',function(ev){
+    const target=ev.target.closest('[data-action]');if(!target)return;
+    const a=target.dataset.action,id=target.dataset.id,num=target.dataset.count;
+    switch(a){
+      case 'challenge-home':S.subject='全部';S.chapter=null;S.quizIds=[];setView('marathon');break;
+      case 'mistake-page':S.quizIds=[];S.mistakeFilter='active';S.mistakeCardIndex=0;S.mistakeFlipped=false;setView('mistake-cards');break;
+      case 'marathon-start':startBlock('marathon',num);break;
+      case 'marathon-chapter':startBlock('marathon',20,id);break;
+      case 'mistake-review':startBlock('review',num);break;
+      case 'mistake-single':startBlock('review',1,id);break;
+      case 'mistake-filter':S.mistakeFilter=target.dataset.val;S.mistakeCardIndex=0;S.mistakeFlipped=false;render();break;
+      case 'mistake-flip':S.mistakeFlipped=!S.mistakeFlipped;render();break;
+      case 'mistake-prev':S.mistakeCardIndex=Math.max(0,S.mistakeCardIndex-1);S.mistakeFlipped=false;render();break;
+      case 'mistake-next':S.mistakeCardIndex+=1;S.mistakeFlipped=false;render();break;
+      case 'marathon-restart':
+        if(window.confirm('確定要開始新一輪 1,094 題？這會重設「全題通關」進度，但不刪除原始作答紀錄、錯題或記憶卡。')){
+          const round=(Number(persist.fullRun?.round)||1)+1;
+          persist.fullRun={version:1,round,startedAt:new Date().toISOString(),completed:{}};
+          save();render();toast('已開始第 '+round+' 輪全題通關');
+        }
+        break;
+    }
+  },false);
+  const query=new URLSearchParams(location.search);
+  if(query.has('mode')){
+    const m=query.get('mode');
+    if(m==='marathon'){S.view='marathon';S.subject='全部';S.chapter=null}
+    if(m==='mistakes'){S.view='mistake-cards';S.subject='全部';S.chapter=null}
+  }
+})();
+
 render();
 </script></body></html>
