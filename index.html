@@ -614,7 +614,7 @@ const originalSetSubject=setSubject;setSubject=function(sub){if(S.view==='notes'
     S.quizType=mode==='marathon'?'marathon':'mistake-course';
     S.view='quiz';render();scrolltop();
   }
-  function recordAnswer(v,q,mode){
+  function recordAnswer(v,q,mode,wasKnown){
     ensure();const right=v===q.answer,now=new Date().toISOString();
     if(mode==='marathon'&&!persist.fullRun.completed[q.id]){
       persist.fullRun.completed[q.id]={right,chosen:v,at:now};
@@ -622,7 +622,7 @@ const originalSetSubject=setSubject;setSubject=function(sub){if(S.view==='notes'
     const previous=persist.mistakeBank[q.id];
     if(!right){
       persist.mistakeBank[q.id]={
-        timesWrong:Math.max(0,Number(previous?.timesWrong)||0)+1,
+        timesWrong:(wasKnown?Math.max(0,Number(previous?.timesWrong)||0):0)+1,
         reviewStreak:0,mastered:false,lastWrongChoice:v,lastWrongAt:now,
         lastReviewAt:mode==='mistake-course'?now:(previous?.lastReviewAt||null),
         reviews:(Number(previous?.reviews)||0)+(mode==='mistake-course'?1:0)
@@ -635,10 +635,10 @@ const originalSetSubject=setSubject;setSubject=function(sub){if(S.view==='notes'
   }
   const oldAnswer=answer;
   answer=function(v){
-    const q=qMap[S.quizIds[S.qIndex]],mode=S.quizType,unanswered=S.selected===null;
+    const q=qMap[S.quizIds[S.qIndex]],mode=S.quizType,unanswered=S.selected===null,wasKnown=!!(q&&persist.mistakeBank?.[q.id]);
     oldAnswer(v);
     if(unanswered&&q&&Number.isInteger(v)&&v>=1&&v<=4){
-      recordAnswer(v,q,mode);render();
+      recordAnswer(v,q,mode,wasKnown);render();
     }
   };
   const oldQuizQuestion=quizQuestion;
